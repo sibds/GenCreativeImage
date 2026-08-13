@@ -118,7 +118,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-ink tracking-tight">
           Генерация герба своей семьи
         </h1>        
-        <p className="text-forest text-sm mt-1">Выберите параметры герба и запустите генерацию через OpenRouter AI</p>
+        <p className="text-forest text-sm mt-1">Выберите параметры герба и запустите генерацию</p>
       </div>
 
       <div className={`grid grid-cols-1 gap-8 items-start transition-[grid-template-columns] duration-500 ease-out ${
