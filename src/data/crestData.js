@@ -271,7 +271,7 @@ export const SHIELD_STYLES = [
   },
   {
     id: 'french',
-    name: 'Французский прямоугольный',
+    name: 'Прямоугольный',
     desc: 'Величавая форма с закруглением',
     promptShape: 'a vertical rectangle with slightly rounded top corners and a tiny point at the bottom center — geometry only',
     promptLayout: 'Place the animal centered in the rectangular field. Put the motto ribbon under the bottom edge. Shape only: no fleurs-de-lis, no ermine, no French royal heraldry.',
@@ -287,7 +287,7 @@ export const SHIELD_STYLES = [
   },
   {
     id: 'spanish',
-    name: 'Испанский каплевидный',
+    name: 'Каплевидный',
     desc: 'Вытянутый боевой щит с округлым верхом и острым основанием',
     promptShape: 'an elongated almond/teardrop: rounded top, long pointed base — geometry only',
     promptLayout: 'Place the animal in the upper half so the long tip stays ornamental. Put the motto ribbon under the pointed base. Shape only: no Spanish royal heraldry, no castles-and-lions.',
