@@ -1,0 +1,296 @@
+const PLACEHOLDER_KEY = 'your_openrouter_api_key_here';
+const ALLOWED_MODES = new Set(['crest', 'ornament']);
+const MAX_PROMPT_LENGTH = 4000;
+const DEFAULT_ENDPOINT = 'https://openrouter.ai/api/v1';
+const DEFAULT_IMAGE_MODEL = 'google/gemini-3-pro-image';
+const DEFAULT_RATE_LIMIT = { windowMs: 10 * 60 * 1000, max: 8 };
+
+const rateBuckets = new Map();
+
+export function resetRateLimit() {
+  rateBuckets.clear();
+}
+
+function envVal(value, fallback = '') {
+  if (value == null) return fallback;
+  const trimmed = String(value).split('#')[0].trim();
+  return trimmed || fallback;
+}
+
+function getServerConfig(env = process.env) {
+  return {
+    apiKey: envVal(env.OPENROUTER_API_KEY),
+    imageModel: envVal(env.OPENROUTER_IMAGE_MODEL, DEFAULT_IMAGE_MODEL),
+    textModel: envVal(env.OPENROUTER_TEXT_MODEL),
+    endpoint: envVal(env.OPENROUTER_ENDPOINT, DEFAULT_ENDPOINT).replace(/\/+$/, '')
+  };
+}
+
+function snippet(text, max = 280) {
+  if (!text) return '';
+  const str = typeof text === 'string' ? text : JSON.stringify(text);
+  return str.length > max ? `${str.slice(0, max)}…` : str;
+}
+
+function formatApiError(bodyText, data) {
+  const msg = data?.error?.message || data?.error || data?.message || bodyText;
+  return snippet(msg);
+}
+
+function asImageUrl(value) {
+  if (!value) return null;
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.startsWith('data:image') || /^https?:\/\//.test(trimmed)) return trimmed;
+
+    const markdown = trimmed.match(/!\[[^\]]*\]\((https?:\/\/[^)\s]+|data:image[^)]+)\)/);
+    if (markdown) return markdown[1];
+
+    const hosted = trimmed.match(/https?:\/\/images\.openrouter\.ai\/[^\s)"']+/);
+    if (hosted) return hosted[0];
+
+    return null;
+  }
+
+  if (typeof value !== 'object') return null;
+
+  if (value.image_url?.url) return asImageUrl(value.image_url.url);
+  if (typeof value.url === 'string') return asImageUrl(value.url);
+  if (value.b64_json) {
+    const mime = value.media_type || value.mimeType || 'image/png';
+    return `data:${mime};base64,${value.b64_json}`;
+  }
+
+  const inline = value.inline_data || value.inlineData;
+  if (inline?.data) {
+    const mime = inline.mime_type || inline.mimeType || 'image/png';
+    return `data:${mime};base64,${inline.data}`;
+  }
+
+  return null;
+}
+
+function extractImageFromResponse(data) {
+  if (!data || typeof data !== 'object') return null;
+
+  if (Array.isArray(data.data) && data.data[0]) {
+    const fromData = asImageUrl(data.data[0]);
+    if (fromData) return fromData;
+  }
+
+  if (Array.isArray(data.images) && data.images[0]) {
+    const fromImages = asImageUrl(data.images[0]);
+    if (fromImages) return fromImages;
+  }
+
+  const msg = data.choices?.[0]?.message;
+  if (!msg) return null;
+
+  if (Array.isArray(msg.images) && msg.images.length > 0) {
+    for (const img of msg.images) {
+      const url = asImageUrl(img);
+      if (url) return url;
+    }
+  }
+
+  if (Array.isArray(msg.content)) {
+    for (const part of msg.content) {
+      const url = asImageUrl(part);
+      if (url) return url;
+      if (part?.type === 'text') {
+        const fromText = asImageUrl(part.text);
+        if (fromText) return fromText;
+      }
+    }
+  }
+
+  if (typeof msg.content === 'string') {
+    return asImageUrl(msg.content);
+  }
+
+  return null;
+}
+
+function authHeaders(apiKey) {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`,
+    'HTTP-Referer': 'https://gencreativeimage.vercel.app',
+    'X-Title': 'Permia Creative Generator'
+  };
+}
+
+function isLoopback(ip) {
+  return !ip
+    || ip === 'local'
+    || ip === '127.0.0.1'
+    || ip === '::1'
+    || ip === '::ffff:127.0.0.1';
+}
+
+function checkRateLimit(ip, { windowMs, max }) {
+  if (isLoopback(ip)) return true;
+  const key = ip || 'unknown';
+  const now = Date.now();
+  const hits = (rateBuckets.get(key) || []).filter((t) => now - t < windowMs);
+  if (hits.length >= max) return false;
+  hits.push(now);
+  rateBuckets.set(key, hits);
+  return true;
+}
+
+function fail(status, error) {
+  return { status, body: { success: false, error } };
+}
+
+async function parseJsonResponse(res) {
+  const bodyText = await res.text();
+  let data = null;
+  try {
+    data = bodyText ? JSON.parse(bodyText) : null;
+  } catch {
+    data = null;
+  }
+  return { bodyText, data };
+}
+
+async function enhancePrompt(rawPrompt, mode, config, fetchFn) {
+  if (!config.textModel) return rawPrompt;
+
+  const systemMsg = mode === 'crest'
+    ? 'You are an expert heraldic artist. Transform the user\'s family crest description into a single, ultra-detailed image generation prompt in English. Include rich heraldic details: shield shape, animal pose, ethnic ornamental patterns, elemental aura effects, gold filigree, banner ribbon with motto. The result should look like a masterwork royal coat of arms. Output ONLY the enhanced prompt, nothing else.'
+    : 'You are a Permian ethnic art expert. Transform the user\'s ornament description into a single, ultra-detailed image generation prompt in English. CRITICAL: absolutely NO humans or people. Strict 2D flat vector art, sharp geometric contours, symmetric composition. Color palette ONLY: Ochre (#C88A35), White (#FFFFFF), Dark Green (#1C4524), Burgundy (#7A1C2C). Output ONLY the enhanced prompt, nothing else.';
+
+  try {
+    const res = await fetchFn(`${config.endpoint}/chat/completions`, {
+      method: 'POST',
+      headers: authHeaders(config.apiKey),
+      body: JSON.stringify({
+        model: config.textModel,
+        messages: [
+          { role: 'system', content: systemMsg },
+          { role: 'user', content: rawPrompt }
+        ],
+        temperature: 0.7
+      })
+    });
+
+    if (!res.ok) return rawPrompt;
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content;
+    if (typeof text === 'string' && text.trim()) return text.trim();
+  } catch {
+    // keep raw prompt
+  }
+
+  return rawPrompt;
+}
+
+export async function handleGenerate({
+  body,
+  ip,
+  env = process.env,
+  fetchFn = fetch,
+  rateLimit = DEFAULT_RATE_LIMIT
+} = {}) {
+  const payload = body && typeof body === 'object' ? body : {};
+  const prompt = typeof payload.prompt === 'string' ? payload.prompt.trim() : '';
+  const mode = typeof payload.mode === 'string' ? payload.mode.trim() : 'crest';
+
+  if (!prompt) return fail(400, 'Нужен prompt.');
+  if (prompt.length > MAX_PROMPT_LENGTH) return fail(400, 'Слишком длинный prompt.');
+  if (!ALLOWED_MODES.has(mode)) return fail(400, 'Недопустимый mode.');
+
+  if (!checkRateLimit(ip, rateLimit)) {
+    return fail(429, 'Слишком много запросов. Подождите несколько минут.');
+  }
+
+  const config = getServerConfig(env);
+  if (!config.apiKey || config.apiKey === PLACEHOLDER_KEY) {
+    return fail(503, 'API ключ не задан на сервере. Укажите OPENROUTER_API_KEY.');
+  }
+
+  const finalPrompt = await enhancePrompt(prompt, mode, config, fetchFn);
+  const headers = authHeaders(config.apiKey);
+  const aspectRatio = mode === 'crest' ? '3:4' : '1:1';
+  let allowChatFallback = false;
+  let lastError = '';
+
+  try {
+    const res = await fetchFn(`${config.endpoint}/images`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: config.imageModel,
+        prompt: finalPrompt,
+        n: 1,
+        aspect_ratio: aspectRatio
+      })
+    });
+
+    const { bodyText, data } = await parseJsonResponse(res);
+
+    if (res.ok) {
+      const imageUrl = extractImageFromResponse(data);
+      if (imageUrl) {
+        return {
+          status: 200,
+          body: {
+            success: true,
+            imageUrl,
+            source: `OpenRouter — ${config.imageModel}`,
+            message: `Готово! Модель: ${config.imageModel}`
+          }
+        };
+      }
+      lastError = 'Модель ответила без изображения.';
+    } else {
+      lastError = `Ошибка OpenRouter (${res.status}): ${formatApiError(bodyText, data)}`;
+      allowChatFallback = res.status === 404 || res.status === 405;
+      if (!allowChatFallback) return fail(res.status, lastError);
+    }
+  } catch (err) {
+    lastError = `Ошибка сети: ${err.message}`;
+    allowChatFallback = true;
+  }
+
+  if (!allowChatFallback) {
+    return fail(502, lastError || 'Модель не вернула изображение.');
+  }
+
+  try {
+    const res = await fetchFn(`${config.endpoint}/chat/completions`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: config.imageModel,
+        messages: [{ role: 'user', content: finalPrompt }],
+        modalities: ['image', 'text']
+      })
+    });
+
+    const { bodyText, data } = await parseJsonResponse(res);
+
+    if (!res.ok) {
+      return fail(res.status, `Ошибка OpenRouter (${res.status}): ${formatApiError(bodyText, data)}`);
+    }
+
+    const imageUrl = extractImageFromResponse(data);
+    if (imageUrl) {
+      return {
+        status: 200,
+        body: {
+          success: true,
+          imageUrl,
+          source: `OpenRouter — ${config.imageModel}`,
+          message: `Готово! Модель: ${config.imageModel}`
+        }
+      };
+    }
+
+    return fail(502, lastError || 'Модель не вернула изображение.');
+  } catch (err) {
+    return fail(502, lastError || `Ошибка сети: ${err.message}`);
+  }
+}
