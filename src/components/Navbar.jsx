@@ -1,24 +1,25 @@
 import React from 'react';
 import { Shield, Grid, Home, Printer } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Navbar({ activeView, setActiveView, onOpenPrint, hasGeneratedImage }) {
   return (
-    <header className="sticky top-0 z-40 bg-linen/95 border-b border-forest/15 px-4 py-3">
+    <header className="sticky top-0 z-40 bg-linen/90 backdrop-blur-sm border-b border-forest/15 px-4 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         
         <div 
           onClick={() => setActiveView('launcher')}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-charcoal flex items-center justify-center group-hover:bg-forest transition-colors">
-            <Shield className="w-5 h-5 text-linen" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center group-hover:bg-forest transition-colors">
+            <img src={logo} alt="" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="font-serif font-bold text-lg md:text-xl text-ink">
               Прикамье Творчество
             </h1>
             <p className="text-xs text-forest font-sans tracking-wide">
-              Генератор гербов & орнаментов (OpenRouter AI)
+              Генератор гербов & орнаментов
             </p>
           </div>
         </div>

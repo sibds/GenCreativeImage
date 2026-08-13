@@ -3,8 +3,21 @@ import { ANIMALS, NATIONALITIES, ELEMENTS, SHIELD_STYLES, buildOpenRoadCrestProm
 import { generateCreativeImage } from '../../services/openRoadService';
 import { Shield, Sparkles, RefreshCw, Printer, Check, Wand2, Cpu, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import UiOrnament from '../ornament/UiOrnament';
 
 const CONFETTI_COLORS = ['#C9953D', '#17241E', '#762F34', '#425B43'];
+
+function CrestIcon({ src, label, className }) {
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt={label || ''}
+      draggable={false}
+      className={`object-contain ${className}`}
+    />
+  );
+}
 
 function buildPrintPayload({ motto, selectedAnimal, selectedNat, selectedElement, imageUrl }) {
   const animalObj = ANIMALS.find(a => a.id === selectedAnimal);
@@ -98,13 +111,10 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
 
-      <div className="mb-8 pb-6 border-b border-forest/15">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-paper border border-ochre/40 text-forest text-xs font-semibold mb-2">
-          <Shield className="w-4 h-4" /> Приложение 1
-        </div>
+      <div className="mb-8 pb-6 border-b border-forest/15">        
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-ink tracking-tight">
           Генерация герба своей семьи
-        </h1>
+        </h1>        
         <p className="text-forest text-sm mt-1">Выберите параметры герба и запустите генерацию через OpenRouter AI</p>
       </div>
 
@@ -118,7 +128,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
               {ANIMALS.map(a => (
                 <button key={a.id} onClick={() => setSelectedAnimal(a.id)}
                   className={chipClass(selectedAnimal === a.id)}>
-                  <span className="text-2xl">{a.icon}</span>
+                  <CrestIcon src={a.icon} label={a.name} className="w-11 h-11" />
                   <span className="text-[11px] font-semibold leading-tight">{a.name}</span>
                 </button>
               ))}
@@ -156,7 +166,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
                       ? 'bg-ochre border-ochre text-ink'
                       : 'bg-paper border-forest/20 text-forest hover:border-ochre/50'
                   }`}>
-                  <span className="text-xl">{el.icon}</span>
+                  <CrestIcon src={el.icon} label={el.name} className="w-10 h-10" />
                   <span className="font-semibold text-xs">{el.name}</span>
                 </button>
               ))}
@@ -221,11 +231,17 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
                 <p className="text-forest text-sm font-medium text-center">Выберите параметры и нажмите</p>
                 <p className="text-charcoal text-base font-bold mt-1">«Сгенерировать герб»</p>
                 <div className="flex items-center gap-2 mt-4 text-xs text-forest">
-                  <span>{currentAnimalObj?.icon} {currentAnimalObj?.name}</span>
+                  <span className="inline-flex items-center gap-1">
+                    <CrestIcon src={currentAnimalObj?.icon} label="" className="w-5 h-5" />
+                    {currentAnimalObj?.name}
+                  </span>
                   <span>•</span>
                   <span>{currentNatObj?.name}</span>
                   <span>•</span>
-                  <span>{currentElObj?.icon} {currentElObj?.name}</span>
+                  <span className="inline-flex items-center gap-1">
+                    <CrestIcon src={currentElObj?.icon} label="" className="w-5 h-5" />
+                    {currentElObj?.name}
+                  </span>
                 </div>
               </div>
             )}

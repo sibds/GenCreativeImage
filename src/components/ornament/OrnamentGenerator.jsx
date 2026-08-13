@@ -3,6 +3,7 @@ import { KAMA_PALETTE, MAIN_SYMBOLS, COMPOSITION_TYPES, buildOpenRoadOrnamentPro
 import { generateCreativeImage } from '../../services/openRoadService';
 import { Grid, Sparkles, RefreshCw, Printer, Check, Wand2, Cpu, AlertCircle, Palette } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import UiOrnament from './UiOrnament';
 
 const CONFETTI_COLORS = ['#C9953D', '#17241E', '#762F34', '#425B43'];
 
@@ -88,13 +89,11 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
 
-      <div className="mb-8 pb-6 border-b border-forest/15">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-paper border border-forest/25 text-forest text-xs font-semibold mb-2">
-          <Grid className="w-4 h-4" /> Приложение 2
-        </div>
+      <div className="mb-8 pb-6 border-b border-forest/15">        
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-ink tracking-tight">
           Генерация орнамента Прикамья
         </h1>
+        <UiOrnament variant="h1" className="mt-3 mb-2" />
         <p className="text-forest text-sm mt-1">2D графика без людей, четкая геометрия, палитра: охра, белый, тёмно-зелёный, бордовый</p>
       </div>
 

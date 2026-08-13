@@ -1,12 +1,18 @@
 // Data for Family Crest Generator (Генератор семейного герба)
 
+const CREST_ICONS = import.meta.glob('../assets/icons/*.png', { eager: true, import: 'default' });
+
+export function crestIconSrc(id) {
+  return CREST_ICONS[`../assets/icons/${id}.png`];
+}
+
 export const ANIMALS = [
   {
     id: 'bear',
     name: 'Медведь',
     trait: 'Сила, мудрость и хозяйственность',
     desc: 'Царь тайги, хранитель семейного очага и защитник рода.',
-    icon: '🐻',
+    icon: crestIconSrc('bear'),
     color: '#8B4513',
     heraldicTerm: 'Степенный Медведь'
   },
@@ -15,7 +21,7 @@ export const ANIMALS = [
     name: 'Волк',
     trait: 'Верность, сплоченность и храбрость',
     desc: 'Символ непреклонного духа, верности стае и своей семье.',
-    icon: '🐺',
+    icon: crestIconSrc('wolf'),
     color: '#708090',
     heraldicTerm: 'Верный Волк'
   },
@@ -24,7 +30,7 @@ export const ANIMALS = [
     name: 'Орел',
     trait: 'Зоркость, свобода и благородство',
     desc: 'Владыка небес, дарующий незримую защиту и великие цели.',
-    icon: '🦅',
+    icon: crestIconSrc('eagle'),
     color: '#DAA520',
     heraldicTerm: 'Парящий Орел'
   },
@@ -33,7 +39,7 @@ export const ANIMALS = [
     name: 'Лис',
     trait: 'Ум, изворотливость и житейская мудрость',
     desc: 'Хранитель изобретательности, гибкого ума и семейного уюта.',
-    icon: '🦊',
+    icon: crestIconSrc('fox'),
     color: '#D2691E',
     heraldicTerm: 'Благородная Лисица'
   },
@@ -42,7 +48,7 @@ export const ANIMALS = [
     name: 'Рысь',
     trait: 'Зоркий взор, интуиция и невидимый страж',
     desc: 'Священный страж северных лесов, видящий сквозь тьму.',
-    icon: '🐱',
+    icon: crestIconSrc('lynx'),
     color: '#CD853F',
     heraldicTerm: 'Страж-Рысь'
   },
@@ -51,7 +57,7 @@ export const ANIMALS = [
     name: 'Лось',
     trait: 'Дух тайги, достоинство и несокрушимость',
     desc: 'Лесной великан, несущий мир, силу и статность.',
-    icon: '🫎',
+    icon: crestIconSrc('moose'),
     color: '#5C4033',
     heraldicTerm: 'Величавый Лось'
   },
@@ -60,7 +66,7 @@ export const ANIMALS = [
     name: 'Сокол',
     trait: 'Стремительность, ясность мысли и честь',
     desc: 'Символ чести, благородных помыслов и стремительных побед.',
-    icon: '🦅',
+    icon: crestIconSrc('falcon'),
     color: '#4682B4',
     heraldicTerm: 'Ясный Сокол'
   },
@@ -69,7 +75,7 @@ export const ANIMALS = [
     name: 'Сова',
     trait: 'Мудрость веков, познание и спокойствие',
     desc: 'Хранительница древних знаний, гармонии и взвешенных решений.',
-    icon: '🦉',
+    icon: crestIconSrc('owl'),
     color: '#483D8B',
     heraldicTerm: 'Мудрая Сова'
   },
@@ -78,7 +84,7 @@ export const ANIMALS = [
     name: 'Благородный Олень',
     trait: 'Чистота помыслов, грация и духовность',
     desc: 'Светлый покровитель рода, символ древа жизни и возрождения.',
-    icon: '🦌',
+    icon: crestIconSrc('deer'),
     color: '#B8860B',
     heraldicTerm: 'Златорогий Олень'
   },
@@ -87,7 +93,7 @@ export const ANIMALS = [
     name: 'Бобр',
     trait: 'Трудолюбие, созидание и богатство дома',
     desc: 'Символ трудолюбивых зодчих, крепкого фундамента и уюта.',
-    icon: '🦫',
+    icon: crestIconSrc('beaver'),
     color: '#A0522D',
     heraldicTerm: 'Зодчий Бобр'
   }
@@ -161,7 +167,7 @@ export const ELEMENTS = [
     id: 'fire',
     name: 'Огонь',
     desc: 'Страсть, энергия, домашний очаг и устремленность вверх.',
-    icon: '🔥',
+    icon: crestIconSrc('fire'),
     colors: ['#FF4500', '#FFD700', '#8B0000'],
     motto: 'Пламень духа и неблекнущий очаг'
   },
@@ -169,7 +175,7 @@ export const ELEMENTS = [
     id: 'water',
     name: 'Вода',
     desc: 'Чистота, глубина мысли, адаптивность и вечное движение.',
-    icon: '💧',
+    icon: crestIconSrc('water'),
     colors: ['#1E90FF', '#00FFFF', '#00008B'],
     motto: 'Глубина истоков и чистота помыслов'
   },
@@ -177,7 +183,7 @@ export const ELEMENTS = [
     id: 'earth',
     name: 'Земля',
     desc: 'Надежность, связь с предками, изобилие и устойчивость.',
-    icon: '🌱',
+    icon: crestIconSrc('earth'),
     colors: ['#2E8B57', '#8B5A2B', '#1C39BB'],
     motto: 'Крепость корней и изобилие плодов'
   },
@@ -185,7 +191,7 @@ export const ELEMENTS = [
     id: 'air',
     name: 'Воздух',
     desc: 'Свобода духа, вдохновение, легкий ум и высота полета.',
-    icon: '💨',
+    icon: crestIconSrc('air'),
     colors: ['#87CEEB', '#E0FFFF', '#4682B4'],
     motto: 'Высота полета и ясность мысли'
   }

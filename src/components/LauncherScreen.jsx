@@ -1,6 +1,6 @@
 import React from 'react';
 import { Shield, Grid, ArrowRight, Palette, Award, Feather, Send } from 'lucide-react';
-import EdgeOrnament from './ornament/EdgeOrnament';
+import UiOrnament from './ornament/UiOrnament';
 
 export default function LauncherScreen({ onSelectApp }) {
   return (
@@ -11,12 +11,14 @@ export default function LauncherScreen({ onSelectApp }) {
           Единый стартовый центр генерации
         </div>
 
-        <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-ink mb-6 leading-tight">
+        <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-ink mb-3 leading-tight">
           Творческое наследие <br />
           <span className="text-charcoal">
             Рода и Прикамья
           </span>
         </h1>
+
+        <UiOrnament variant="h1" className="mx-auto mb-6" />
 
         <p className="text-forest text-base sm:text-lg max-w-2xl mx-auto font-sans font-light leading-relaxed">
           Выберите приложение для генерации цифрового искусства на базе движка <span className="text-ink font-medium">OpenRoad AI</span>. Создайте свой семейный герб или традиционный 2D орнамент с возможностью мгновенной отправки на печать в Telegram-бот.
@@ -29,7 +31,7 @@ export default function LauncherScreen({ onSelectApp }) {
           onClick={() => onSelectApp('crest')}
           className="group relative rounded-2xl paper-card border border-ochre/35 hover:border-ochre p-8 cursor-pointer transition-colors overflow-hidden flex flex-col justify-between"
         >
-          <EdgeOrnament variant="band" />
+          <UiOrnament variant="h2" className="mx-auto mb-5" />
 
           <div>
             <div className="w-16 h-16 rounded-xl bg-charcoal flex items-center justify-center mb-6">
@@ -61,7 +63,9 @@ export default function LauncherScreen({ onSelectApp }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-6 border-t border-forest/15">
+          <UiOrnament variant="h2" className="mx-auto mb-4" />
+
+          <div className="flex items-center justify-between pt-4 border-t border-forest/15">
             <span className="text-xs text-ochre font-medium">Запустить геральдику</span>
             <div className="w-10 h-10 rounded-lg bg-ochre/20 group-hover:bg-ochre text-charcoal flex items-center justify-center transition-colors">
               <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
@@ -73,7 +77,7 @@ export default function LauncherScreen({ onSelectApp }) {
           onClick={() => onSelectApp('ornament')}
           className="group relative rounded-2xl paper-card border border-forest/30 hover:border-forest p-8 cursor-pointer transition-colors overflow-hidden flex flex-col justify-between"
         >
-          <EdgeOrnament variant="band" />
+          <UiOrnament variant="h2" className="mx-auto mb-5" />
 
           <div>
             <div className="w-16 h-16 rounded-xl bg-burgundy flex items-center justify-center mb-6">
@@ -108,7 +112,9 @@ export default function LauncherScreen({ onSelectApp }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-6 border-t border-forest/15">
+          <UiOrnament variant="h2" className="mx-auto mb-4" />
+
+          <div className="flex items-center justify-between pt-4 border-t border-forest/15">
             <span className="text-xs text-forest font-medium">Запустить геометрию узора</span>
             <div className="w-10 h-10 rounded-lg bg-forest/15 group-hover:bg-forest text-forest group-hover:text-linen flex items-center justify-center transition-colors">
               <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />

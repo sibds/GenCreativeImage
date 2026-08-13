@@ -54,6 +54,12 @@ h1, h2, h3, .font-serif {
   box-shadow: 0 8px 24px rgba(23, 36, 30, 0.08);
 }
 
+.ornament-knockout {
+  mix-blend-mode: screen;
+  pointer-events: none;
+  user-select: none;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -75,6 +81,7 @@ h1, h2, h3, .font-serif {
     color: #000000 !important;
   }
 
+  .app-bg,
   header, footer, nav, button, .print\:hidden {
     display: none !important;
   }
