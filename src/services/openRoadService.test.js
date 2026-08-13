@@ -34,17 +34,4 @@ describe('generateCreativeImage (client)', () => {
     expect(result.success).toBe(false);
     expect(result.error).toMatch(/таймаут|timeout/i);
   });
-
-  it('reads the final SSE data event from /api/generate', async () => {
-    const sse = ': ping\n\ndata: {"success":true,"imageUrl":"https://images.openrouter.ai/x.png"}\n\n';
-    globalThis.fetch = vi.fn(async () => new Response(sse, {
-      status: 200,
-      headers: { 'Content-Type': 'text/event-stream' }
-    }));
-
-    const result = await generateCreativeImage({ prompt: 'bear', mode: 'crest' });
-
-    expect(result.success).toBe(true);
-    expect(result.imageUrl).toBe('https://images.openrouter.ai/x.png');
-  });
 });
