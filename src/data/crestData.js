@@ -224,6 +224,7 @@ export function buildOpenRoadCrestPrompt({ animal, nationality, element, motto, 
   const animalObj = ANIMALS.find(a => a.id === animal) || ANIMALS[0];
   const natObj = NATIONALITIES.find(n => n.id === nationality) || NATIONALITIES[0];
   const elObj = ELEMENTS.find(e => e.id === element) || ELEMENTS[0];
+  const shieldObj = SHIELD_STYLES.find(s => s.id === shieldStyle) || SHIELD_STYLES[0];
 
-  return `Family coat of arms, crest emblem, high detail heraldry. Central figure: majestic ${animalObj.name} (${animalObj.trait}). Culture & ethnic motifs: ${natObj.name} traditional ornamental patterns, ${natObj.symbolBg}. Elemental motif: ${elObj.name} (${elObj.colors.join(', ')} color aura). Shield style: ${shieldStyle}. Bottom gold banner ribbon with motto: "${motto || elObj.motto}". Masterpiece, regal heraldic art, intricate gold embroidery, crisp contours, 8k resolution, photorealistic digital painting.`;
+  return `Family coat of arms, crest emblem, high detail heraldry. Central figure: majestic ${animalObj.name} (${animalObj.trait}). Culture & ethnic motifs: ${natObj.name} traditional ornamental patterns, ${natObj.symbolBg}. Elemental motif: ${elObj.name} (${elObj.colors.join(', ')} color aura). Shield style: ${shieldObj.name} (${shieldObj.desc}). Bottom gold banner ribbon with motto: "${motto || elObj.motto}". Masterpiece, regal heraldic art, intricate gold embroidery, crisp contours, 8k resolution, photorealistic digital painting.`;
 }
