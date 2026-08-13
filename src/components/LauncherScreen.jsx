@@ -7,21 +7,17 @@ export default function LauncherScreen({ onSelectApp }) {
     <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-center p-6 overflow-hidden">
 
       <div className="relative z-10 max-w-4xl text-center mb-12 animate-fade-in">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-paper border border-ochre/40 text-forest text-xs font-semibold uppercase tracking-wider mb-6">
-          Единый стартовый центр генерации
-        </div>
-
         <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-ink mb-3 leading-tight">
           Творческое наследие <br />
           <span className="text-charcoal">
-            Рода и Прикамья
+            рода и Прикамья
           </span>
         </h1>
 
         <UiOrnament variant="h1" className="mx-auto mb-6" />
 
         <p className="text-forest text-base sm:text-lg max-w-2xl mx-auto font-sans font-light leading-relaxed">
-          Выберите приложение для генерации цифрового искусства на базе движка <span className="text-ink font-medium">OpenRoad AI</span>. Создайте свой семейный герб или традиционный 2D орнамент с возможностью мгновенной отправки на печать в Telegram-бот.
+          Выберите приложение для генерации цифрового искусства. Создайте свой семейный герб или традиционный 2D орнамент с возможностью мгновенной отправки на печать в Telegram-бот.
         </p>
       </div>
 
