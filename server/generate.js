@@ -193,6 +193,7 @@ async function enhancePrompt(rawPrompt, mode, config, fetchFn) {
     const res = await fetchFn(`${config.endpoint}/chat/completions`, {
       method: 'POST',
       headers: authHeaders(config.apiKey),
+      signal: AbortSignal.timeout(12_000),
       body: JSON.stringify({
         model: config.textModel,
         messages: [
@@ -248,11 +249,14 @@ export async function handleGenerate({
     const res = await fetchFn(`${config.endpoint}/images`, {
       method: 'POST',
       headers,
+      signal: AbortSignal.timeout(270_000),
       body: JSON.stringify({
         model: config.imageModel,
         prompt: finalPrompt,
         n: 1,
-        aspect_ratio: aspectRatio
+        aspect_ratio: aspectRatio,
+        output_format: 'jpeg',
+        resolution: '1K'
       })
     });
 
@@ -266,11 +270,14 @@ export async function handleGenerate({
       lastError = 'Модель ответила без изображения.';
     } else {
       lastError = `Ошибка OpenRouter (${res.status}): ${formatApiError(bodyText, data)}`;
-      allowChatFallback = res.status === 404 || res.status === 405;
+      allowChatFallback = res.status === 400 || res.status === 404 || res.status === 405;
       if (!allowChatFallback) return fail(res.status, lastError);
     }
   } catch (err) {
     lastError = `Ошибка сети: ${err.message}`;
+    if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+      return fail(504, 'Таймаут OpenRouter: модель не успела вернуть изображение.');
+    }
     allowChatFallback = true;
   }
 
@@ -282,6 +289,7 @@ export async function handleGenerate({
     const res = await fetchFn(`${config.endpoint}/chat/completions`, {
       method: 'POST',
       headers,
+      signal: AbortSignal.timeout(270_000),
       body: JSON.stringify({
         model: config.imageModel,
         messages: [{ role: 'user', content: finalPrompt }],

@@ -219,7 +219,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
                   <Cpu className="w-8 h-8 text-charcoal absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
                 <p className="text-charcoal text-sm font-medium text-center">{statusMessage}</p>
-                <p className="text-forest text-xs mt-2">Это может занять 10–30 секунд...</p>
+                <p className="text-forest text-xs mt-2">Это может занять до 1–2 минут...</p>
               </div>
             )}
 

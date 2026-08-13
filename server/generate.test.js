@@ -83,6 +83,23 @@ describe('handleGenerate', () => {
     expect(JSON.parse(init.body).model).toBe('google/gemini-3-pro-image');
   });
 
+  it('asks OpenRouter for a compact jpeg so the Vercel payload stays under 4.5MB', async () => {
+    const fetchFn = vi.fn(async () => jsonResponse(200, {
+      data: [{ url: 'https://images.openrouter.ai/x.png' }]
+    }));
+
+    await handleGenerate({
+      body: { prompt: 'a bear crest', mode: 'crest' },
+      ip: '1.1.1.1',
+      env: ENV,
+      fetchFn
+    });
+
+    const body = JSON.parse(fetchFn.mock.calls[0][1].body);
+    expect(body.output_format).toBe('jpeg');
+    expect(body.resolution).toBe('1K');
+  });
+
   it('does not leak the api key in the response', async () => {
     const fetchFn = vi.fn(async () => jsonResponse(200, {
       data: [{ url: 'https://images.openrouter.ai/x.png' }]

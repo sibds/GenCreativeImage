@@ -1,7 +1,9 @@
 import { handleGenerate } from '../server/generate.js';
 
+export const maxDuration = 300;
+
 export const config = {
-  maxDuration: 60
+  maxDuration: 300
 };
 
 function clientIp(req) {
@@ -12,16 +14,41 @@ function clientIp(req) {
   return req.socket?.remoteAddress || 'unknown';
 }
 
+function startSse(res) {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders?.();
+  res.write(':\n\n');
+}
+
+function writeSseData(res, payload) {
+  res.write(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ success: false, error: 'Method not allowed' });
     return;
   }
 
-  const result = await handleGenerate({
-    body: req.body,
-    ip: clientIp(req)
-  });
+  startSse(res);
+  const ping = setInterval(() => {
+    res.write(':\n\n');
+  }, 8000);
 
-  res.status(result.status).json(result.body);
+  try {
+    const result = await handleGenerate({
+      body: req.body,
+      ip: clientIp(req)
+    });
+    writeSseData(res, result.body);
+  } catch (err) {
+    writeSseData(res, { success: false, error: err.message || 'Ошибка генерации.' });
+  } finally {
+    clearInterval(ping);
+    res.end();
+  }
 }
