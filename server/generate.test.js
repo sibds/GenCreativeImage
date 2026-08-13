@@ -126,6 +126,37 @@ describe('handleGenerate', () => {
     expect(JSON.parse(imageCall[1].body).prompt).toBe(result.body.prompt);
   });
 
+  it('asks the text model for flat folk illustration, not photorealistic heraldry', async () => {
+    const fetchFn = vi.fn(async (url) => {
+      if (String(url).endsWith('/chat/completions')) {
+        return jsonResponse(200, {
+          choices: [{ message: { content: 'flat 2D folk illustration of a bear crest' } }]
+        });
+      }
+      return jsonResponse(200, {
+        data: [{ url: 'https://images.openrouter.ai/x.png' }]
+      });
+    });
+
+    await handleGenerate({
+      body: { prompt: 'a bear crest', mode: 'crest' },
+      ip: '1.1.1.1',
+      env: { ...ENV, OPENROUTER_TEXT_MODEL: 'openai/gpt-4o-mini' },
+      fetchFn
+    });
+
+    const chatCall = fetchFn.mock.calls.find(([url]) => String(url).endsWith('/chat/completions'));
+    const system = JSON.parse(chatCall[1].body).messages[0].content;
+    expect(system).toMatch(/Family emblem, ethnographic folk crest/);
+    expect(system).toMatch(/Preserve its structure/i);
+    expect(system).toMatch(/Keep the named animal and the named shield geometry/);
+    expect(system).toMatch(/Do not substitute a bear or a pointed heater shield/);
+    expect(system).toMatch(/Avoid list must remain/);
+    expect(system).not.toMatch(/masterwork royal coat of arms/i);
+    expect(system).not.toMatch(/elemental aura effects/i);
+    expect(system).not.toMatch(/Rewrite the user's family crest/i);
+  });
+
   it('rate-limits repeated requests from the same IP', async () => {
     const fetchFn = vi.fn(async () => jsonResponse(200, {
       data: [{ url: 'https://images.openrouter.ai/x.png' }]

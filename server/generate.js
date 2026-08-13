@@ -5,6 +5,22 @@ const DEFAULT_ENDPOINT = 'https://openrouter.ai/api/v1';
 const DEFAULT_IMAGE_MODEL = 'google/gemini-3-pro-image';
 const DEFAULT_RATE_LIMIT = { windowMs: 10 * 60 * 1000, max: 8 };
 
+const CREST_ENHANCE_SYSTEM = `The user message is already a complete image-generation prompt for a family emblem in flat 2D ethnographic folk-art style.
+
+Preserve its structure, palette, shield description, motto, Visual style block, and Avoid list.
+Keep the named animal and the named shield geometry exactly as given. Do not substitute a bear or a pointed heater shield if the prompt asks for a different animal or shape.
+You may add a few named folk motifs (embroidery, wood carving, solar signs) in the same register.
+Do not turn it into European heraldry or a royal coat of arms.
+
+Forbidden in the output: photorealism, photorealistic, 8k, high-detail heraldry, gold embroidery, gold filigree, regal, royal, luxurious, metallic, coat of arms, cinematic lighting, 3D, gradients, realistic fur, realistic fire, baroque.
+
+Opening must stay: Family emblem, ethnographic folk crest
+The Avoid list must remain.
+
+Output ONLY the prompt, nothing else.`;
+
+const ORNAMENT_ENHANCE_SYSTEM = 'You are a Permian ethnic art expert. Transform the user\'s ornament description into a single, ultra-detailed image generation prompt in English. CRITICAL: absolutely NO humans or people. Strict 2D flat vector art, sharp geometric contours, symmetric composition. Color palette ONLY: Ochre (#C88A35), White (#FFFFFF), Dark Green (#1C4524), Burgundy (#7A1C2C). Output ONLY the enhanced prompt, nothing else.';
+
 const rateBuckets = new Map();
 
 export function resetRateLimit() {
@@ -171,9 +187,7 @@ async function parseJsonResponse(res) {
 async function enhancePrompt(rawPrompt, mode, config, fetchFn) {
   if (!config.textModel) return rawPrompt;
 
-  const systemMsg = mode === 'crest'
-    ? 'You are an expert heraldic artist. Transform the user\'s family crest description into a single, ultra-detailed image generation prompt in English. Include rich heraldic details: shield shape, animal pose, ethnic ornamental patterns, elemental aura effects, gold filigree, banner ribbon with motto. The result should look like a masterwork royal coat of arms. Output ONLY the enhanced prompt, nothing else.'
-    : 'You are a Permian ethnic art expert. Transform the user\'s ornament description into a single, ultra-detailed image generation prompt in English. CRITICAL: absolutely NO humans or people. Strict 2D flat vector art, sharp geometric contours, symmetric composition. Color palette ONLY: Ochre (#C88A35), White (#FFFFFF), Dark Green (#1C4524), Burgundy (#7A1C2C). Output ONLY the enhanced prompt, nothing else.';
+  const systemMsg = mode === 'crest' ? CREST_ENHANCE_SYSTEM : ORNAMENT_ENHANCE_SYSTEM;
 
   try {
     const res = await fetchFn(`${config.endpoint}/chat/completions`, {
