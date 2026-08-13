@@ -97,7 +97,33 @@ describe('handleGenerate', () => {
 
     expect(result.body.success).toBe(true);
     expect(result.body.imageUrl).toBe('https://images.openrouter.ai/x.png');
+    expect(result.body.prompt).toBe('a bear crest');
     expect(JSON.stringify(result)).not.toContain('sk-or-v1-server-secret');
+  });
+
+  it('returns the enhanced prompt that was sent to the image model', async () => {
+    const fetchFn = vi.fn(async (url) => {
+      if (String(url).endsWith('/chat/completions')) {
+        return jsonResponse(200, {
+          choices: [{ message: { content: 'Enhanced heraldic bear crest, gold filigree' } }]
+        });
+      }
+      return jsonResponse(200, {
+        data: [{ url: 'https://images.openrouter.ai/x.png' }]
+      });
+    });
+
+    const result = await handleGenerate({
+      body: { prompt: 'a bear crest', mode: 'crest' },
+      ip: '1.1.1.1',
+      env: { ...ENV, OPENROUTER_TEXT_MODEL: 'openai/gpt-4o-mini' },
+      fetchFn
+    });
+
+    expect(result.body.success).toBe(true);
+    expect(result.body.prompt).toBe('Enhanced heraldic bear crest, gold filigree');
+    const imageCall = fetchFn.mock.calls.find(([url]) => String(url).endsWith('/images'));
+    expect(JSON.parse(imageCall[1].body).prompt).toBe(result.body.prompt);
   });
 
   it('rate-limits repeated requests from the same IP', async () => {

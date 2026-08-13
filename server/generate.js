@@ -144,6 +144,19 @@ function fail(status, error) {
   return { status, body: { success: false, error } };
 }
 
+function okImage({ imageUrl, model, prompt }) {
+  return {
+    status: 200,
+    body: {
+      success: true,
+      imageUrl,
+      prompt,
+      source: `OpenRouter — ${model}`,
+      message: `Готово! Модель: ${model}`
+    }
+  };
+}
+
 async function parseJsonResponse(res) {
   const bodyText = await res.text();
   let data = null;
@@ -234,15 +247,7 @@ export async function handleGenerate({
     if (res.ok) {
       const imageUrl = extractImageFromResponse(data);
       if (imageUrl) {
-        return {
-          status: 200,
-          body: {
-            success: true,
-            imageUrl,
-            source: `OpenRouter — ${config.imageModel}`,
-            message: `Готово! Модель: ${config.imageModel}`
-          }
-        };
+        return okImage({ imageUrl, model: config.imageModel, prompt: finalPrompt });
       }
       lastError = 'Модель ответила без изображения.';
     } else {
@@ -278,15 +283,7 @@ export async function handleGenerate({
 
     const imageUrl = extractImageFromResponse(data);
     if (imageUrl) {
-      return {
-        status: 200,
-        body: {
-          success: true,
-          imageUrl,
-          source: `OpenRouter — ${config.imageModel}`,
-          message: `Готово! Модель: ${config.imageModel}`
-        }
-      };
+      return okImage({ imageUrl, model: config.imageModel, prompt: finalPrompt });
     }
 
     return fail(502, lastError || 'Модель не вернула изображение.');

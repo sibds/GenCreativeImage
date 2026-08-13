@@ -4,6 +4,7 @@ import { generateCreativeImage } from '../../services/openRoadService';
 import { Shield, Sparkles, RefreshCw, Printer, Check, Wand2, Cpu, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import UiOrnament from '../ornament/UiOrnament';
+import PromptReveal from '../PromptReveal';
 
 const CONFETTI_COLORS = ['#C9953D', '#17241E', '#762F34', '#425B43'];
 
@@ -66,7 +67,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
       });
 
       if (result.success) {
-        setGeneratedResult(result);
+        setGeneratedResult({ ...result, prompt: result.prompt || prompt });
         onGenerated?.(buildPrintPayload({
           motto,
           selectedAnimal,
@@ -100,6 +101,8 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
   const currentAnimalObj = ANIMALS.find(a => a.id === selectedAnimal);
   const currentNatObj = NATIONALITIES.find(n => n.id === selectedNat);
   const currentElObj = ELEMENTS.find(e => e.id === selectedElement);
+  const currentShieldObj = SHIELD_STYLES.find(s => s.id === shieldStyle);
+  const previewActive = isGenerating || !!generatedResult || !!errorMessage;
 
   const chipClass = (selected) =>
     `p-2.5 rounded-xl border text-center transition-colors flex flex-col items-center gap-1 ${
@@ -118,9 +121,13 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
         <p className="text-forest text-sm mt-1">Выберите параметры герба и запустите генерацию через OpenRouter AI</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className={`grid grid-cols-1 gap-8 items-start transition-[grid-template-columns] duration-500 ease-out ${
+        previewActive
+          ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'
+          : 'lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]'
+      }`}>
 
-        <div className="lg:col-span-6 space-y-6 paper-card border border-forest/15 p-6 rounded-2xl">
+        <div className="min-w-0 space-y-6 paper-card border border-forest/15 p-6 rounded-2xl">
 
           <div>
             <label className="block text-sm font-semibold text-forest uppercase tracking-wider mb-3">1. Животное-тотем</label>
@@ -138,7 +145,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
 
           <div>
             <label className="block text-sm font-semibold text-forest uppercase tracking-wider mb-3">2. Народность</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {NATIONALITIES.map(n => (
                 <button key={n.id} onClick={() => setSelectedNat(n.id)}
                   className={`p-3 rounded-xl border text-left transition-colors ${
@@ -153,7 +160,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
                   <p className="text-[10px] text-ink/60 line-clamp-1">{n.subtitle}</p>
                 </button>
               ))}
-            </div>
+            </div>            
           </div>
 
           <div>
@@ -173,19 +180,24 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-forest mb-1.5">Фамилия / Девиз семьи:</label>
-              <input type="text" value={motto} onChange={(e) => setMotto(e.target.value)} placeholder="Семья Ивановых"
-                className="w-full px-4 py-2.5 rounded-xl bg-linen border border-forest/25 text-ink text-sm focus:outline-none focus:border-ochre" />
+          <div>
+            <label className="block text-sm font-semibold text-forest uppercase tracking-wider mb-3">Форма щита</label>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              {SHIELD_STYLES.map(s => (
+                <button key={s.id} onClick={() => setShieldStyle(s.id)}
+                  className={chipClass(shieldStyle === s.id)}>
+                  <CrestIcon src={s.icon} label={s.name} className="w-11 h-11" />
+                  <span className="text-[11px] font-semibold leading-tight">{s.name}</span>
+                </button>
+              ))}
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-forest mb-1.5">Форма щита:</label>
-              <select value={shieldStyle} onChange={(e) => setShieldStyle(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-linen border border-forest/25 text-ink text-sm focus:outline-none focus:border-ochre">
-                {SHIELD_STYLES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            </div>
+            {currentShieldObj && <p className="mt-2 text-xs text-forest bg-linen p-2 rounded-lg border border-forest/15">{currentShieldObj.desc}</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-forest mb-1.5">Фамилия / Девиз семьи:</label>
+            <input type="text" value={motto} onChange={(e) => setMotto(e.target.value)} placeholder="Семья Ивановых"
+              className="w-full px-4 py-2.5 rounded-xl bg-linen border border-forest/25 text-ink text-sm focus:outline-none focus:border-ochre" />
           </div>
 
           <button onClick={handleGenerateAI} disabled={isGenerating}
@@ -197,7 +209,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
           </button>
         </div>
 
-        <div className="lg:col-span-6 flex flex-col items-center sticky top-24">
+        <div className="min-w-0 flex flex-col items-center sticky top-24">
           <div className="w-full paper-card border border-forest/15 rounded-2xl overflow-hidden">
 
             {isGenerating && (
@@ -243,6 +255,12 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
                     {currentElObj?.name}
                   </span>
                 </div>
+                <div className="flex items-center gap-2 mt-4 text-xs text-forest">                                    
+                  <span className="inline-flex items-center gap-1">
+                    <CrestIcon src={currentShieldObj?.icon} label="" className="w-5 h-5" />
+                    {currentShieldObj?.name}
+                  </span>
+                </div>
               </div>
             )}
 
@@ -269,6 +287,7 @@ export default function CrestGenerator({ onOpenPrint, onGenerated }) {
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-paper hover:bg-linen text-ink font-medium text-xs transition-colors border border-forest/25">
                     <RefreshCw className="w-4 h-4" /> Сгенерировать заново
                   </button>
+                  <PromptReveal prompt={generatedResult.prompt} />
                 </div>
               </div>
             )}

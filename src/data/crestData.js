@@ -1,9 +1,14 @@
 // Data for Family Crest Generator (Генератор семейного герба)
 
 const CREST_ICONS = import.meta.glob('../assets/icons/*.png', { eager: true, import: 'default' });
+const SHIELD_ICONS = import.meta.glob('../assets/icons/shields/*.png', { eager: true, import: 'default' });
 
 export function crestIconSrc(id) {
   return CREST_ICONS[`../assets/icons/${id}.png`];
+}
+
+export function shieldIconSrc(id) {
+  return SHIELD_ICONS[`../assets/icons/shields/${id}.png`];
 }
 
 export const ANIMALS = [
@@ -159,6 +164,16 @@ export const NATIONALITIES = [
     accentColor: '#0288D1',
     secondaryColor: '#455A64',
     symbolBg: 'Пермский звериный оберег'
+  },
+  {
+    id: 'chuvash',
+    name: 'Чуваши',
+    subtitle: 'Древо жизни, три солнца и красная вышивка кеске',
+    desc: 'Геометрическая нагрудная вышивка кеске, мировое древо Йĕпĕ, три солнца и пурпурно-золотая палитра чувашского знамени.',
+    patterns: ['Кеске', 'Древо жизни', 'Три солнца'],
+    accentColor: '#8E244D',
+    secondaryColor: '#FFD700',
+    symbolBg: 'Древо жизни и три солнца'
   }
 ];
 
@@ -198,10 +213,11 @@ export const ELEMENTS = [
 ];
 
 export const SHIELD_STYLES = [
-  { id: 'classic', name: 'Варяжский / Старинный', desc: 'Заостренный снизу классический щит' },
-  { id: 'french', name: 'Французский прямоугольный', desc: 'Величавая форма с закруглением' },
-  { id: 'spanish', name: 'Испанский каплевидный', desc: 'Закругленный книзу щит славянских князей' },
-  { id: 'targe', name: 'Круглый Тарч', desc: 'Древний защитный диск с орнаментом' }
+  { id: 'classic', name: 'Варяжский / Старинный', desc: 'Заостренный снизу классический щит', icon: shieldIconSrc('classic') },
+  { id: 'french', name: 'Французский прямоугольный', desc: 'Величавая форма с закруглением', icon: shieldIconSrc('french') },
+  { id: 'slavic', name: 'Славянский', desc: 'Закругленный книзу щит славянских князей', icon: shieldIconSrc('slavic') },
+  { id: 'spanish', name: 'Испанский каплевидный', desc: 'Вытянутый боевой щит с округлым верхом и острым основанием', icon: shieldIconSrc('spanish') },
+  { id: 'targe', name: 'Круглый Тарч', desc: 'Древний защитный диск с орнаментом', icon: shieldIconSrc('targe') }
 ];
 
 export function buildOpenRoadCrestPrompt({ animal, nationality, element, motto, shieldStyle }) {

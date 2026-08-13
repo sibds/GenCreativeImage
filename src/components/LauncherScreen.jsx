@@ -55,7 +55,7 @@ export default function LauncherScreen({ onSelectApp }) {
                 <Feather className="w-3.5 h-3.5 text-ochre" /> 10 животных
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-linen border border-forest/15 text-forest text-xs flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-burgundy" /> 6 народностей
+                <Award className="w-3.5 h-3.5 text-burgundy" /> 7 народностей
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-linen border border-forest/15 text-forest text-xs flex items-center gap-1.5">
                 4 стихии
