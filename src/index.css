@@ -1,13 +1,32 @@
-/* Base typography and custom scrollbars */
+:root {
+  --linen: #F3EBDD;
+  --paper: #FAF6EE;
+  --charcoal: #17241E;
+  --ochre: #C9953D;
+  --burgundy: #762F34;
+  --forest: #425B43;
+  --ink: #211F1B;
+}
+
 body {
   font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #020617;
-  color: #f8fafc;
+  background-color: var(--linen);
+  color: var(--ink);
   overflow-x: hidden;
 }
 
 h1, h2, h3, .font-serif {
   font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+::selection {
+  background-color: var(--ochre);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ochre);
+  outline-offset: 2px;
 }
 
 /* Custom Scrollbar */
@@ -17,28 +36,24 @@ h1, h2, h3, .font-serif {
 }
 
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: var(--linen);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--forest);
   border-radius: 9999px;
-  border: 2px solid #020617;
+  border: 2px solid var(--linen);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--charcoal);
 }
 
-/* Glassmorphism utility */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+.paper-card {
+  background: var(--paper);
+  box-shadow: 0 8px 24px rgba(23, 36, 30, 0.08);
 }
 
-/* Smooth keyframe animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -54,7 +69,6 @@ h1, h2, h3, .font-serif {
   animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Print specific optimizations */
 @media print {
   body {
     background-color: #ffffff !important;

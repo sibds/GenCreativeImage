@@ -5,6 +5,7 @@ import CrestGenerator from './components/crest/CrestGenerator';
 import OrnamentGenerator from './components/ornament/OrnamentGenerator';
 import PrintModal from './components/print/PrintModal';
 import ApiSettingsModal from './components/settings/ApiSettingsModal';
+import EdgeOrnament from './components/ornament/EdgeOrnament';
 
 export default function App() {
   const [activeView, setActiveView] = useState('launcher'); // 'launcher' | 'crest' | 'ornament'
@@ -23,7 +24,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
+    <div className="min-h-screen bg-linen text-ink flex flex-col font-sans selection:bg-ochre selection:text-ink">
+      <EdgeOrnament />
 
       <Navbar
         activeView={activeView}
@@ -66,27 +68,26 @@ export default function App() {
         />
       )}
 
-      <footer className="border-t border-slate-900 bg-slate-950/80 py-6 px-4 text-center text-xs text-slate-500">
+      <footer className="border-t border-forest/15 bg-linen py-6 px-4 text-center text-xs text-forest">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div>
             Прикамье Творчество © {new Date().getFullYear()} • Генератор гербов и орнаментов (OpenRoad Engine)
           </div>
-          <div className="flex items-center gap-4 text-slate-400">
-            <button onClick={() => handleSetView('crest')} className="hover:text-amber-300">
+          <div className="flex items-center gap-4 text-charcoal">
+            <button onClick={() => handleSetView('crest')} className="hover:text-ochre">
               Герб Семьи
             </button>
-            <span>•</span>
-            <button onClick={() => handleSetView('ornament')} className="hover:text-emerald-300">
+            <span className="text-forest/40">•</span>
+            <button onClick={() => handleSetView('ornament')} className="hover:text-ochre">
               Орнамент Прикамья
             </button>
-            <span>•</span>
-            <button onClick={() => setShowSettings(true)} className="hover:text-rose-300">
+            <span className="text-forest/40">•</span>
+            <button onClick={() => setShowSettings(true)} className="hover:text-ochre">
               API OpenRoad
             </button>
           </div>
         </div>
       </footer>
-
     </div>
   );
 }
