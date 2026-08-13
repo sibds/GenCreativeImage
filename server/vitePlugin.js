@@ -1,4 +1,5 @@
-import { handleGenerate } from './generate.js';
+import { createJobStore } from './jobStore.js';
+import { startGenerateJob, runGenerateJob, getGenerateJob } from './jobs.js';
 
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -22,11 +23,27 @@ function sendJson(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function jobIdFromUrl(url) {
+  try {
+    return new URL(url, 'http://localhost').searchParams.get('job');
+  } catch {
+    return null;
+  }
+}
+
 export function localGenerateApiPlugin(env) {
+  const store = createJobStore(env);
+
   const handle = async (req, res, next) => {
-    const url = req.url?.split('?')[0];
-    if (url !== '/api/generate') {
+    const path = req.url?.split('?')[0];
+    if (path !== '/api/generate') {
       next();
+      return;
+    }
+
+    if (req.method === 'GET') {
+      const result = await getGenerateJob({ jobId: jobIdFromUrl(req.url), store });
+      sendJson(res, result.status, result.body);
       return;
     }
 
@@ -37,12 +54,10 @@ export function localGenerateApiPlugin(env) {
 
     try {
       const body = await readJsonBody(req);
-      const result = await handleGenerate({
-        body,
-        ip: req.socket?.remoteAddress || 'local',
-        env
-      });
-      sendJson(res, result.status, result.body);
+      const ip = req.socket?.remoteAddress || 'local';
+      const started = await startGenerateJob({ store });
+      void runGenerateJob({ jobId: started.jobId, body, ip, env, store });
+      sendJson(res, started.status, started.body);
     } catch {
       sendJson(res, 400, { success: false, error: 'Некорректный JSON.' });
     }
