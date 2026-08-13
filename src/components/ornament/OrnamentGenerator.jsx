@@ -95,8 +95,7 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
       <div className="mb-8 pb-6 border-b border-forest/15">        
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-ink tracking-tight">
           Генерация орнамента Прикамья
-        </h1>
-        <UiOrnament variant="h1" className="mt-3 mb-2" />
+        </h1>        
         <p className="text-forest text-sm mt-1">2D графика без людей, четкая геометрия, палитра: охра, белый, тёмно-зелёный, бордовый</p>
       </div>
 
