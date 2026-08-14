@@ -19,7 +19,18 @@ The Avoid list must remain.
 
 Output ONLY the prompt, nothing else.`;
 
-const ORNAMENT_ENHANCE_SYSTEM = 'You are a Permian ethnic art expert. Transform the user\'s ornament description into a single, ultra-detailed image generation prompt in English. CRITICAL: absolutely NO humans or people. Strict 2D flat vector art, sharp geometric contours, symmetric composition. Color palette ONLY: Ochre (#C88A35), White (#FFFFFF), Dark Green (#1C4524), Burgundy (#7A1C2C). Output ONLY the enhanced prompt, nothing else.';
+const ORNAMENT_ENHANCE_SYSTEM = `The user message is already a complete image-generation prompt for a Kama-region geometric ornament in flat 2D vector style.
+
+Preserve its structure, COMPOSITION TYPE, spatial layout, selected symbols, palette, Visual style block, and Avoid list.
+Keep the named composition geometry exactly as given. Do not turn a tile into a medallion, a border into a full-page pattern, a medallion into a carpet, or a frame into a filled field.
+You may add a few named folk motifs (embroidery, wood carving, solar signs) in the same register.
+
+Forbidden in the output: extra embellishment, 8k, high-detail, intricate patterns, masterpiece, photorealism, photorealistic, people, humans, gradients, shadows, 3D.
+
+Opening must stay: COMPOSITION TYPE
+The Avoid list must remain.
+
+Output ONLY the prompt, nothing else.`;
 
 const rateBuckets = new Map();
 

@@ -174,6 +174,35 @@ describe('handleGenerate', () => {
     expect(system).not.toMatch(/Rewrite the user's family crest/i);
   });
 
+  it('asks the text model to preserve ornament composition geometry, not ultra-detail it', async () => {
+    const fetchFn = vi.fn(async (url) => {
+      if (String(url).endsWith('/chat/completions')) {
+        return jsonResponse(200, {
+          choices: [{ message: { content: 'COMPOSITION TYPE: ALL-OVER REPEATING ORNAMENT.\nflat 2D vector ornament' } }]
+        });
+      }
+      return jsonResponse(200, {
+        data: [{ url: 'https://images.openrouter.ai/x.png' }]
+      });
+    });
+
+    await handleGenerate({
+      body: { prompt: 'COMPOSITION TYPE: ALL-OVER REPEATING ORNAMENT.\nseamless tile', mode: 'ornament' },
+      ip: '1.1.1.1',
+      env: { ...ENV, OPENROUTER_TEXT_MODEL: 'openai/gpt-4o-mini' },
+      fetchFn
+    });
+
+    const chatCall = fetchFn.mock.calls.find(([url]) => String(url).endsWith('/chat/completions'));
+    const system = JSON.parse(chatCall[1].body).messages[0].content;
+    expect(system).toMatch(/COMPOSITION TYPE/);
+    expect(system).toMatch(/Preserve its structure/i);
+    expect(system).toMatch(/Keep the named composition geometry/);
+    expect(system).toMatch(/Avoid list must remain/);
+    expect(system).not.toMatch(/ultra-detailed/i);
+    expect(system).not.toMatch(/Transform the user's ornament/i);
+  });
+
   it('rate-limits repeated requests from the same IP', async () => {
     const fetchFn = vi.fn(async () => jsonResponse(200, {
       data: [{ url: 'https://images.openrouter.ai/x.png' }]
