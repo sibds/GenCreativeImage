@@ -8,6 +8,18 @@ import PromptReveal from '../PromptReveal';
 
 const CONFETTI_COLORS = ['#C9953D', '#17241E', '#762F34', '#425B43'];
 
+function OrnamentIcon({ src, label, className }) {
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt={label || ''}
+      draggable={false}
+      className={`object-contain ${className}`}
+    />
+  );
+}
+
 function buildPrintPayload({ selectedSymbols, composition, imageUrl }) {
   const symbolNames = selectedSymbols.map(id => MAIN_SYMBOLS.find(s => s.id === id)?.name).filter(Boolean).join(', ');
   const compObj = COMPOSITION_TYPES.find(c => c.id === composition);
@@ -32,7 +44,7 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
 
   const toggleSymbol = (id) => {
     if (selectedSymbols.includes(id)) {
-      if (selectedSymbols.length > 1) setSelectedSymbols(selectedSymbols.filter(s => s.id !== id));
+      if (selectedSymbols.length > 1) setSelectedSymbols(selectedSymbols.filter(s => s !== id));
     } else {
       setSelectedSymbols([...selectedSymbols, id]);
     }
@@ -109,7 +121,7 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
 
           <div>
             <label className="block text-xs font-semibold text-forest uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Palette className="w-4 h-4" /> Палитра (по ТЗ):
+              <Palette className="w-4 h-4" /> Палитра:
             </label>
             <div className="grid grid-cols-4 gap-2">
               {Object.values(KAMA_PALETTE).map(c => (
@@ -135,7 +147,7 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
                       sel ? 'bg-ochre border-ochre text-ink' : 'bg-paper border-forest/20 text-forest hover:border-ochre/50'
                     }`}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xl">{sym.icon}</span>
+                      <OrnamentIcon src={sym.icon} label={sym.name} className="w-11 h-11" />
                       {sel && <Check className="w-4 h-4 text-ink" />}
                     </div>
                     <div className="font-bold text-xs">{sym.name}</div>
@@ -151,11 +163,12 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {COMPOSITION_TYPES.map(comp => (
                 <button key={comp.id} onClick={() => setComposition(comp.id)}
-                  className={`p-2.5 rounded-xl border text-center transition-colors text-xs ${
+                  className={`p-2.5 rounded-xl border text-center transition-colors text-xs flex flex-col items-center gap-1.5 ${
                     composition === comp.id
                       ? 'bg-ochre border-ochre text-ink font-semibold'
                       : 'bg-paper border-forest/20 text-forest hover:border-ochre/50'
                   }`}>
+                  <OrnamentIcon src={comp.icon} label={comp.name} className="w-full h-14" />
                   {comp.name}
                 </button>
               ))}

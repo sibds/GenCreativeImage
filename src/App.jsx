@@ -88,7 +88,7 @@ export default function App() {
             </div>
             <div className="flex items-center gap-4 text-charcoal">
               <button onClick={() => handleSetView('crest')} className="hover:text-ochre">
-                Герб Семьи
+                Герб семьи
               </button>
               <span className="text-forest/40">•</span>
               <button onClick={() => handleSetView('ornament')} className="hover:text-ochre">

@@ -16,7 +16,7 @@ export default function Navbar({ activeView, setActiveView, onOpenPrint, hasGene
           </div>
           <div>
             <h1 className="font-serif font-bold text-lg md:text-xl text-ink">
-              Прикамье Творчество
+              Творчество Прикамье 
             </h1>
             <p className="text-xs text-forest font-sans tracking-wide">
               Генератор гербов & орнаментов
@@ -46,7 +46,7 @@ export default function Navbar({ activeView, setActiveView, onOpenPrint, hasGene
             }`}
           >
             <Shield className="w-4 h-4" />
-            Герб Семьи
+            Герб семьи
           </button>
 
           <button
