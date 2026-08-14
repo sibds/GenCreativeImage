@@ -15,6 +15,13 @@ body {
   overflow-x: hidden;
 }
 
+html.kiosk,
+html.kiosk body,
+html.kiosk #root {
+  height: 100%;
+  overflow: hidden;
+}
+
 h1, h2, h3, .font-serif {
   font-family: 'Cormorant Garamond', Georgia, serif;
 }

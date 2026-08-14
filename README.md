@@ -40,13 +40,13 @@
 | Параметры | тотем (10), народность (7), стихия (4), форма щита (5), девиз | символы (5, минимум 1), композиция (4) |
 | Стиль | плоский этнографический folk, не европейская геральдика | плоский 2D-вектор, палитра охра / белый / тёмно-зелёный / бордовый |
 
-После генерации: скачать PNG, печать из браузера, заявка в Telegram-бот / email (см. [Печать](#печать)).
+После генерации: кнопка «Отправить на печать» шлёт макет в Telegram-группу и/или на email по серверному `.env`. Если каналы не заданы — скачать PNG / печать из браузера (см. [Печать](#печать)).
 
 ## Стек
 
 - React 19 + Vite 8, Tailwind 4
 - OpenRouter (`/images`, fallback на `/chat/completions`)
-- Vercel Serverless (`api/generate.js`, `maxDuration: 300`) + `@vercel/blob` для job-store в проде
+- Vercel Serverless (`api/generate.js`, `maxDuration: 300`; `api/dispatch.js`) + `@vercel/blob` для job-store в проде
 - Vitest, Oxlint
 
 ## Как устроена генерация
@@ -87,7 +87,7 @@ npm run dev              # http://localhost:5173
 
 ## Переменные окружения
 
-Серверные. Префикс `VITE_` для ключа **запрещён** — Vite упадёт при старте.
+Серверные OpenRouter/Blob — без `VITE_`. Префикс `VITE_` для ключа **запрещён** — Vite упадёт при старте. Киоск — `VITE_KIOSK_*` (не секреты).
 
 | Переменная | Default | Зачем |
 |---|---|---|
@@ -97,13 +97,44 @@ npm run dev              # http://localhost:5173
 | `OPENROUTER_ENDPOINT` | `https://openrouter.ai/api/v1` | база API |
 | `BLOB_STORE_ID` | — | store id Vercel Blob (прод) |
 | `BLOB_READ_WRITE_TOKEN` | — | токен Blob, если не из Vercel env |
+| `VITE_KIOSK_CONTROLS` | `0` | кнопки «Киоск» / «Обычный режим»; по умолчанию скрыты |
+| `VITE_KIOSK` | `0` | стартовать сразу в киоске |
+| `VITE_KIOSK_IDLE_MS` | `600000` | видимый отсчёт «Сброс через …» после успешной генерации (10 мин) |
+| `VITE_KIOSK_COUNTDOWN_MS` | `30000` | с этой отметки кнопка «Сброс» подсвечивается бордовым |
+| `TELEGRAM_BOT_TOKEN` | — | токен бота для `sendPhoto` в группу |
+| `TELEGRAM_CHAT_ID` | — | `-100…` супергруппы или `@PublicGroup` |
+| `SMTP_HOST` | — | SMTP-сервер |
+| `SMTP_PORT` | `465` | 465/TLS на Vercel надёжнее, чем 587 |
+| `SMTP_SECURE` | по порту | `1`/`true` — TLS; `0`/`false` — нет |
+| `SMTP_USER` / `SMTP_PASS` | — | логин SMTP |
+| `DISPATCH_EMAIL_FROM` | = `SMTP_USER` | From |
+| `DISPATCH_EMAIL_TO` | — | ящик печати |
+
+`VITE_KIOSK_*` попадают в клиентский бандл — это не секреты. После смены перезапусти Vite / пересобери.
 
 На Vercel те же имена в Environment Variables. Функции: `api/generate.js` → `maxDuration` 300.
+
+### Киоск
+
+Полноэкранный режим под Chrome `--kiosk`: без навбара и футера, контент вписывается в экран, из приложения **нельзя** вернуться на лаунчер.
+
+| Переменная | Default | Поведение |
+|---|---|---|
+| `VITE_KIOSK_CONTROLS` | `0` | `1` — в Navbar кнопка «Киоск», в шапке киоска «Обычный режим». Иначе кнопок входа/выхода нет |
+| `VITE_KIOSK` | `0` | `1` — открыть сразу в киоске (киоск-ПК). Иначе обычный UI |
+| `VITE_KIOSK_IDLE_MS` | `600000` | после успешной генерации под картинкой сразу идёт отсчёт (10 мин). Любой клик/тач перезапускает. `0` на таймере — сброс **состояния текущего приложения** (форма и картинка), URL и экран не меняются |
+| `VITE_KIOSK_COUNTDOWN_MS` | `30000` | когда осталось ≤ 30 с, кнопка «Сброс» становится бордовой |
+
+Вход без кнопок: `?kiosk=1` в URL бьёт `VITE_KIOSK`. Ярлык Chrome:
+
+```bash
+chrome.exe --kiosk --app=http://localhost:5173/?kiosk=1
+```
 
 ## Скрипты
 
 ```bash
-npm run dev       # Vite + локальный /api/generate
+npm run dev       # Vite + локальный /api/generate и /api/dispatch
 npm run build
 npm run preview   # прод-сборка + тот же API-плагин
 npm test          # vitest run
@@ -172,29 +203,49 @@ node scripts/capture-screenshots.mjs
 
 Ошибки старта: `400` (нет/длинный prompt, плохой mode), `429`, `503` (нет ключа), `504` (таймаут модели).
 
+`GET /api/dispatch` → `{ "telegram": true|false, "email": true|false }` (без секретов).
+
+`POST /api/dispatch`
+
+```json
+{ "imageUrl": "data:image/jpeg;base64,...", "title": "Семейный герб", "metadata": "…" }
+```
+
+- `200 { "success": true, "telegram": { "ok": true }, "email": { "ok": true } }` — каналы, которые включены в env
+- `200` с `success: true` и `email.ok: false`, если SMTP упал, а Telegram прошёл (и наоборот)
+- `400` нет/кривой `imageUrl`
+- `429` rate limit
+- `502` все включённые каналы упали
+- `503 { "error": "no_channels" }` — в env нет ни Telegram, ни SMTP
+
 ## Печать
 
-`PrintModal`: Telegram, email, download/print.
+Кнопка «Отправить на печать» (карточка результата и Navbar).
 
-- Download и `window.print()` — рабочие.
-- Telegram: прямой `sendPhoto`, если в localStorage лежит `botToken`; иначе симуляция + deep-link на `KamaPrintGenBot` (имя бота правится в Настройках).
-- Email — симуляция очереди, реального SMTP нет.
+- Если в `.env` задан Telegram (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) и/или SMTP (`SMTP_HOST` + `DISPATCH_EMAIL_TO` + from/user) — модалки нет, сразу `POST /api/dispatch`. Оба канала — оба параллельно.
+- Если каналов нет — модалка только со скачиванием PNG и `window.print()`.
+- Токен бота и SMTP живут только на сервере. Имя группы в Telegram — это `chat.id` (`-100…`), не отображаемое название.
 
-Имя бота: `localStorage.telegram_bot_config`.
+Как снять `TELEGRAM_CHAT_ID`: добавить бота в группу (право слать фото) → любое сообщение в группе → `GET https://api.telegram.org/bot<TOKEN>/getUpdates` → `chat.id`. Для публичной группы можно `@username`.
+
+На Vercel для SMTP бери порт **465** (TLS). 587 STARTTLS в serverless часто отваливается. С домашней сети провайдеры часто режут исходящие 25/465 — тогда локально `SMTP_PORT=587` + `SMTP_SECURE=0`. `$` в `SMTP_PASS` Vite больше не разворачивает.
 
 ## Структура
 
 ```
 api/generate.js              Vercel handler (waitUntil + poll)
+api/dispatch.js              печать: GET флаги каналов, POST Telegram/SMTP
 server/generate.js           OpenRouter, rate limit, enhance
+server/dispatch.js           sendPhoto + nodemailer, allSettled
 server/jobs.js               UUID-джобы
 server/jobStore.js           memory | Vercel Blob
-server/vitePlugin.js         /api/generate в dev/preview
+server/vitePlugin.js         /api/generate и /api/dispatch в dev/preview
 src/data/crestData.js
 src/data/ornamentData.js
 src/services/openRoadService.js   POST + poll
-src/services/telegramService.js
-src/components/{crest,ornament,print,settings}/
+src/services/dispatchService.js   GET config + POST печати
+src/kiosk/config.js              VITE_KIOSK_* + ?kiosk=1
+src/components/{crest,ornament,print,settings,kiosk}/
 docs/                        требования к промптам орнамента
 ```
 
@@ -202,10 +253,13 @@ docs/                        требования к промптам орнам
 
 ```
 server/generate.test.js
+server/dispatch.test.js
 server/jobs.test.js
 server/jobStore.test.js
 src/data/ornamentData.test.js
 src/services/openRoadService.test.js
+src/kiosk/config.test.js
+src/kiosk/useKioskIdle.test.js
 ```
 
 OpenRouter в тестах мокается; ключ не нужен.

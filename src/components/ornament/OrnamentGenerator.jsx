@@ -3,8 +3,8 @@ import { KAMA_PALETTE, MAIN_SYMBOLS, COMPOSITION_TYPES, buildOpenRoadOrnamentPro
 import { generateCreativeImage } from '../../services/openRoadService';
 import { Grid, Sparkles, RefreshCw, Printer, Check, Wand2, Cpu, AlertCircle, Palette } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import UiOrnament from './UiOrnament';
 import PromptReveal from '../PromptReveal';
+import KioskResetButton from '../kiosk/KioskResetButton';
 
 const CONFETTI_COLORS = ['#C9953D', '#17241E', '#762F34', '#425B43'];
 
@@ -31,11 +31,18 @@ function buildPrintPayload({ selectedSymbols, composition, imageUrl }) {
   };
 }
 
-export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
+export default function OrnamentGenerator({
+  onOpenPrint,
+  onGenerated,
+  kiosk = false,
+  countdown = null,
+  countdownWarnMs = 0,
+  onReset
+}) {
   const [selectedSymbols, setSelectedSymbols] = useState(['rhombus', 'wave', 'cross']);
   const [composition, setComposition] = useState('tile');
-  const [repeatCount, setRepeatCount] = useState(4);
-  const [strokeWidth, setStrokeWidth] = useState(3);
+  const repeatCount = 4;
+  const strokeWidth = 3;
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
@@ -102,34 +109,48 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
   const previewActive = isGenerating || !!generatedResult || !!errorMessage;
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8">
+    <div className={kiosk ? 'min-h-full p-3 flex flex-col' : 'max-w-7xl mx-auto p-4 sm:p-6 md:p-8'}>
 
-      <div className="mb-8 pb-6 border-b border-forest/15">        
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold text-ink tracking-tight">
+      <div className={`border-b border-forest/15 ${kiosk ? 'mb-3 pb-2' : 'mb-8 pb-6'}`}>
+        <h1 className={`font-serif font-bold text-ink tracking-tight ${
+          kiosk ? 'text-2xl' : 'text-3xl sm:text-4xl'
+        }`}>
           Генерация орнамента Прикамья
-        </h1>        
-        <p className="text-forest text-sm mt-1">2D графика без людей, четкая геометрия, палитра: охра, белый, тёмно-зелёный, бордовый</p>
+        </h1>
+        {!kiosk && (
+          <p className="text-forest text-sm mt-1">2D графика без людей, четкая геометрия, палитра: охра, белый, тёмно-зелёный, бордовый</p>
+        )}
       </div>
 
-      <div className={`grid grid-cols-1 gap-8 items-start transition-[grid-template-columns] duration-500 ease-out ${
-        previewActive
-          ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'
-          : 'lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]'
+      <div className={`grid items-start ${
+        kiosk
+          ? 'grid-cols-2 gap-3'
+          : `grid-cols-1 gap-8 transition-[grid-template-columns] duration-500 ease-out ${
+              previewActive
+                ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]'
+                : 'lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]'
+            }`
       }`}>
 
-        <div className="min-w-0 space-y-6 paper-card border border-forest/15 p-6 rounded-2xl">
+        <div className={`min-w-0 paper-card border border-forest/15 rounded-2xl ${
+          kiosk ? 'space-y-3 p-3' : 'space-y-6 p-6'
+        }`}>
 
           <div>
-            <label className="block text-xs font-semibold text-forest uppercase tracking-wider mb-3 flex items-center gap-2">
+            <label className={`font-semibold text-forest uppercase tracking-wider flex items-center gap-2 ${
+              kiosk ? 'text-[11px] mb-1.5' : 'text-xs mb-3'
+            }`}>
               <Palette className="w-4 h-4" /> Палитра:
             </label>
             <div className="grid grid-cols-4 gap-2">
               {Object.values(KAMA_PALETTE).map(c => (
-                <div key={c.hex} className="p-2.5 rounded-xl bg-linen border border-forest/15 flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg border border-forest/20 flex-shrink-0" style={{ backgroundColor: c.hex }} />
+                <div key={c.hex} className={`rounded-xl bg-linen border border-forest/15 flex items-center gap-2 ${
+                  kiosk ? 'p-1.5' : 'p-2.5'
+                }`}>
+                  <div className={`rounded-lg border border-forest/20 flex-shrink-0 ${kiosk ? 'w-6 h-6' : 'w-7 h-7'}`} style={{ backgroundColor: c.hex }} />
                   <div>
                     <div className="text-[11px] font-bold text-ink">{c.name}</div>
-                    <div className="text-[9px] text-forest font-mono">{c.hex}</div>
+                    {!kiosk && <div className="text-[9px] text-forest font-mono">{c.hex}</div>}
                   </div>
                 </div>
               ))}
@@ -137,21 +158,23 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-forest uppercase tracking-wider mb-3">Символы:</label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <label className={`block font-semibold text-forest uppercase tracking-wider ${
+              kiosk ? 'text-[11px] mb-1.5' : 'text-xs mb-3'
+            }`}>Символы:</label>
+            <div className={`grid gap-2 ${kiosk ? 'grid-cols-3' : 'grid-cols-1 sm:grid-cols-3'}`}>
               {MAIN_SYMBOLS.map(sym => {
                 const sel = selectedSymbols.includes(sym.id);
                 return (
                   <button key={sym.id} onClick={() => toggleSymbol(sym.id)}
-                    className={`p-3 rounded-xl border text-left transition-colors ${
+                    className={`rounded-xl border text-left transition-colors ${kiosk ? 'p-2' : 'p-3'} ${
                       sel ? 'bg-ochre border-ochre text-ink' : 'bg-paper border-forest/20 text-forest hover:border-ochre/50'
                     }`}>
                     <div className="flex items-center justify-between mb-1">
-                      <OrnamentIcon src={sym.icon} label={sym.name} className="w-11 h-11" />
+                      <OrnamentIcon src={sym.icon} label={sym.name} className={kiosk ? 'w-9 h-9' : 'w-11 h-11'} />
                       {sel && <Check className="w-4 h-4 text-ink" />}
                     </div>
                     <div className="font-bold text-xs">{sym.name}</div>
-                    <div className="text-[10px] text-ink/70 mt-0.5">{sym.meaning}</div>
+                    {!kiosk && <div className="text-[10px] text-ink/70 mt-0.5">{sym.meaning}</div>}
                   </button>
                 );
               })}
@@ -159,16 +182,20 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-forest uppercase tracking-wider mb-3">Композиция:</label>
+            <label className={`block font-semibold text-forest uppercase tracking-wider ${
+              kiosk ? 'text-[11px] mb-1.5' : 'text-xs mb-3'
+            }`}>Композиция:</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {COMPOSITION_TYPES.map(comp => (
                 <button key={comp.id} onClick={() => setComposition(comp.id)}
-                  className={`p-2.5 rounded-xl border text-center transition-colors text-xs flex flex-col items-center gap-1.5 ${
+                  className={`rounded-xl border text-center transition-colors text-xs flex flex-col items-center ${
+                    kiosk ? 'p-2 gap-1' : 'p-2.5 gap-1.5'
+                  } ${
                     composition === comp.id
                       ? 'bg-ochre border-ochre text-ink font-semibold'
                       : 'bg-paper border-forest/20 text-forest hover:border-ochre/50'
                   }`}>
-                  <OrnamentIcon src={comp.icon} label={comp.name} className="w-full h-14" />
+                  <OrnamentIcon src={comp.icon} label={comp.name} className={kiosk ? 'w-full h-10' : 'w-full h-14'} />
                   {comp.name}
                 </button>
               ))}
@@ -176,7 +203,9 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
           </div>
 
           <button onClick={handleGenerateAI} disabled={isGenerating}
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-charcoal hover:bg-forest text-linen font-bold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            className={`w-full flex items-center justify-center gap-3 rounded-xl bg-charcoal hover:bg-forest text-linen font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              kiosk ? 'py-3 text-base' : 'py-4 text-lg'
+            }`}>
             {isGenerating
               ? <><RefreshCw className="w-6 h-6 animate-spin" /> Генерация...</>
               : <><Wand2 className="w-6 h-6" /> Сгенерировать орнамент</>
@@ -184,11 +213,11 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
           </button>
         </div>
 
-        <div className="min-w-0 flex flex-col items-center sticky top-24">
+        <div className={`min-w-0 flex flex-col items-center ${kiosk ? '' : 'sticky top-24'}`}>
           <div className="w-full paper-card border border-forest/15 rounded-2xl overflow-hidden">
 
             {isGenerating && (
-              <div className="flex flex-col items-center justify-center py-24 px-8">
+              <div className={`flex flex-col items-center justify-center px-8 ${kiosk ? 'py-12' : 'py-24'}`}>
                 <div className="relative mb-6">
                   <div className="w-20 h-20 border-4 border-forest/20 border-t-ochre rounded-full animate-spin" />
                   <Cpu className="w-8 h-8 text-charcoal absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -199,7 +228,7 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
             )}
 
             {!isGenerating && errorMessage && (
-              <div className="flex flex-col items-center justify-center py-16 px-8">
+              <div className={`flex flex-col items-center justify-center px-8 ${kiosk ? 'py-10' : 'py-16'}`}>
                 <AlertCircle className="w-14 h-14 text-burgundy mb-4" />
                 <p className="text-burgundy text-sm font-medium text-center mb-2">Ошибка генерации</p>
                 <p className="text-forest text-xs text-center max-w-md">{errorMessage}</p>
@@ -211,7 +240,7 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
             )}
 
             {!isGenerating && !errorMessage && !generatedResult && (
-              <div className="flex flex-col items-center justify-center py-24 px-8">
+              <div className={`flex flex-col items-center justify-center px-8 ${kiosk ? 'py-12' : 'py-24'}`}>
                 <div className="w-32 h-32 rounded-2xl border-2 border-dashed border-forest/25 flex items-center justify-center mb-6">
                   <Grid className="w-16 h-16 text-forest/30" />
                 </div>
@@ -229,28 +258,35 @@ export default function OrnamentGenerator({ onOpenPrint, onGenerated }) {
 
             {!isGenerating && generatedResult && generatedResult.success && (
               <div className="flex flex-col">
-                <div className="p-4 border-b border-forest/15 flex items-center justify-between">
+                <div className={`border-b border-forest/15 flex items-center justify-between ${kiosk ? 'p-2.5' : 'p-4'}`}>
                   <div className="flex items-center gap-2 text-xs text-forest font-medium">
                     <Sparkles className="w-4 h-4" /> {generatedResult.source || 'OpenRouter AI'}
                   </div>
                   <span className="text-[10px] text-forest/70">{generatedResult.message}</span>
                 </div>
 
-                <div className="p-4 flex justify-center bg-linen">
+                <div className={`flex justify-center bg-linen ${kiosk ? 'p-2' : 'p-4'}`}>
                   <img src={generatedResult.imageUrl} alt="Сгенерированный орнамент"
-                    className="max-w-full max-h-[520px] object-contain rounded-xl border border-forest/15" />
+                    className={`max-w-full object-contain rounded-xl border border-forest/15 ${
+                      kiosk ? 'max-h-[min(420px,46vh)]' : 'max-h-[520px]'
+                    }`} />
                 </div>
 
-                <div className="p-4 border-t border-forest/15 flex flex-col gap-3">
+                <div className={`border-t border-forest/15 flex flex-col ${kiosk ? 'p-2.5 gap-2' : 'p-4 gap-3'}`}>                  
                   <button onClick={handlePrintClick}
                     className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-burgundy hover:bg-burgundy/90 text-linen font-bold text-sm transition-colors">
                     <Printer className="w-5 h-5" /> Отправить на печать
                   </button>
+                  <KioskResetButton
+                    countdown={kiosk ? countdown : null}
+                    warnMs={kiosk ? countdownWarnMs : 0}
+                    onReset={onReset}
+                  />
                   <button onClick={handleGenerateAI}
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-paper hover:bg-linen text-ink font-medium text-xs transition-colors border border-forest/25">
                     <RefreshCw className="w-4 h-4" /> Сгенерировать заново
                   </button>
-                  <PromptReveal prompt={generatedResult.prompt} />
+                  {!kiosk && <PromptReveal prompt={generatedResult.prompt} />}
                 </div>
               </div>
             )}

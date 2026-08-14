@@ -1,8 +1,16 @@
 import React from 'react';
-import { Shield, Grid, Home, Printer } from 'lucide-react';
+import { Shield, Grid, Home, Printer, Maximize2 } from 'lucide-react';
 import logo from '../assets/logo.png';
 
-export default function Navbar({ activeView, setActiveView, onOpenPrint, hasGeneratedImage }) {
+export default function Navbar({
+  activeView,
+  setActiveView,
+  onOpenPrint,
+  hasGeneratedImage,
+  printBusy = false,
+  showKioskButton = false,
+  onEnterKiosk
+}) {
   return (
     <header className="sticky top-0 z-40 bg-linen/90 backdrop-blur-sm border-b border-forest/15 px-4 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -63,14 +71,25 @@ export default function Navbar({ activeView, setActiveView, onOpenPrint, hasGene
         </nav>
 
         <div className="flex items-center gap-3 min-w-[9rem] justify-end">
+          {showKioskButton && (
+            <button
+              onClick={onEnterKiosk}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-paper hover:bg-linen text-forest hover:text-ink text-xs md:text-sm font-medium transition-colors border border-forest/25"
+              title="Полноэкранный режим без меню"
+            >
+              <Maximize2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Киоск</span>
+            </button>
+          )}
           {hasGeneratedImage && (
             <button
               onClick={onOpenPrint}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-burgundy hover:bg-burgundy/90 text-linen text-xs md:text-sm font-medium transition-colors"
+              disabled={printBusy}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-burgundy hover:bg-burgundy/90 text-linen text-xs md:text-sm font-medium transition-colors disabled:opacity-50"
               title="Отправить сгенерированное изображение на печать"
             >
               <Printer className="w-4 h-4" />
-              <span className="hidden sm:inline">Печать / Telegram</span>
+              <span className="hidden sm:inline">{printBusy ? 'Отправка...' : 'Печать'}</span>
             </button>
           )}
         </div>
