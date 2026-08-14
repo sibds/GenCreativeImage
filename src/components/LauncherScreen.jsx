@@ -34,10 +34,6 @@ export default function LauncherScreen({ onSelectApp }) {
               <Shield className="w-9 h-9 text-linen" />
             </div>
 
-            <div className="inline-block px-3 py-1 rounded-md bg-ochre/15 text-ochre text-xs font-medium mb-3">
-              Приложение 1
-            </div>
-
             <h2 className="font-serif text-2xl font-bold text-ink mb-3 group-hover:text-charcoal transition-colors">
               Генерация герба своей семьи
             </h2>
@@ -57,9 +53,7 @@ export default function LauncherScreen({ onSelectApp }) {
                 4 стихии
               </span>
             </div>
-          </div>
-
-          <UiOrnament variant="h2" className="mx-auto mb-4" />
+          </div>         
 
           <div className="flex items-center justify-between pt-4 border-t border-forest/15">
             <span className="text-xs text-ochre font-medium">Запустить геральдику</span>
@@ -78,10 +72,6 @@ export default function LauncherScreen({ onSelectApp }) {
           <div>
             <div className="w-16 h-16 rounded-xl bg-burgundy flex items-center justify-center mb-6">
               <Grid className="w-9 h-9 text-linen" />
-            </div>
-
-            <div className="inline-block px-3 py-1 rounded-md bg-forest/10 text-forest text-xs font-medium mb-3">
-              Приложение 2
             </div>
 
             <h2 className="font-serif text-2xl font-bold text-ink mb-3 group-hover:text-charcoal transition-colors">
@@ -107,8 +97,6 @@ export default function LauncherScreen({ onSelectApp }) {
               </span>
             </div>
           </div>
-
-          <UiOrnament variant="h2" className="mx-auto mb-4" />
 
           <div className="flex items-center justify-between pt-4 border-t border-forest/15">
             <span className="text-xs text-forest font-medium">Запустить геометрию узора</span>

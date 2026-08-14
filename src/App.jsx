@@ -6,7 +6,6 @@ import OrnamentGenerator from './components/ornament/OrnamentGenerator';
 import PrintModal from './components/print/PrintModal';
 import ApiSettingsModal from './components/settings/ApiSettingsModal';
 import EdgeOrnament from './components/ornament/EdgeOrnament';
-import UiOrnament from './components/ornament/UiOrnament';
 import background from './assets/background.png';
 
 export default function App() {
@@ -80,12 +79,11 @@ export default function App() {
           />
         )}
 
-        <footer className="border-t border-forest/15 bg-linen/80 py-6 px-4 text-center text-xs text-forest">
-          <UiOrnament variant="h2" className="mx-auto mb-4" />
+        <footer className="border-t border-forest/15 bg-linen/80 py-6 px-4 text-center text-xs text-forest">          
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
               © ООО "СибСР", {new Date().getFullYear()} • Генератор гербов и орнаментов 
-            </div>
+            </div>           
             <div className="flex items-center gap-4 text-charcoal">
               <button onClick={() => handleSetView('crest')} className="hover:text-ochre">
                 Герб семьи

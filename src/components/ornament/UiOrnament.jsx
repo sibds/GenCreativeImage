@@ -17,7 +17,7 @@ export default function UiOrnament({ variant, className = '' }) {
       alt=""
       aria-hidden="true"
       draggable="false"
-      className={`ornament-knockout object-contain ${SIZE[variant]} ${className}`}
+      className={`object-contain ${SIZE[variant]} ${className}`}
     />
   );
 }
