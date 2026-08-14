@@ -15,6 +15,7 @@
     "@vercel/functions": "^3.9.3",
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^1.31.0",
+    "nodemailer": "^9.0.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

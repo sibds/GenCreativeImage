@@ -1,5 +1,6 @@
 import { createJobStore } from './jobStore.js';
 import { startGenerateJob, runGenerateJob, getGenerateJob } from './jobs.js';
+import { dispatchPrint, getDispatchConfig } from './dispatch.js';
 
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -36,6 +37,30 @@ export function localGenerateApiPlugin(env) {
 
   const handle = async (req, res, next) => {
     const path = req.url?.split('?')[0];
+
+    if (path === '/api/dispatch') {
+      if (req.method === 'GET') {
+        const { telegram, email } = getDispatchConfig(env);
+        sendJson(res, 200, { telegram, email });
+        return;
+      }
+
+      if (req.method !== 'POST') {
+        sendJson(res, 405, { success: false, error: 'Method not allowed' });
+        return;
+      }
+
+      try {
+        const body = await readJsonBody(req);
+        const ip = req.socket?.remoteAddress || 'local';
+        const result = await dispatchPrint({ body, ip, env });
+        sendJson(res, result.status, result.body);
+      } catch {
+        sendJson(res, 400, { success: false, error: 'Некорректный JSON.' });
+      }
+      return;
+    }
+
     if (path !== '/api/generate') {
       next();
       return;
