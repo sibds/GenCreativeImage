@@ -1,10 +1,34 @@
+<p align="center">
+  <img src="src/assets/logo.png" width="96" alt="Творчество Прикамье" />
+</p>
+
 # Творчество Прикамье
+
+<p align="center">
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19" /></a>
+  <a href="https://vite.dev"><img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite 8" /></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind-4-38BDF8?logo=tailwindcss&logoColor=white" alt="Tailwind 4" /></a>
+  <a href="https://vercel.com"><img src="https://img.shields.io/badge/Vercel-ready-000000?logo=vercel&logoColor=white" alt="Vercel" /></a>
+  <a href="https://vitest.dev"><img src="https://img.shields.io/badge/Vitest-passing-6E9F18?logo=vitest&logoColor=white" alt="Vitest" /></a>
+  <a href="https://openrouter.ai"><img src="https://img.shields.io/badge/OpenRouter-Gemini-191919" alt="OpenRouter" /></a>
+  <a href="https://github.com/sibds/GenCreativeImage"><img src="https://img.shields.io/github/last-commit/sibds/GenCreativeImage" alt="last commit" /></a>
+</p>
 
 Веб-приложение для генерации семейных гербов и геометрических орнаментов Прикамья. Картинки рисует модель через OpenRouter; ключ живёт только на сервере.
 
-Репозиторий: [sibds/GenCreativeImage](https://github.com/sibds/GenCreativeImage)
+Репозиторий: [sibds/GenCreativeImage](https://github.com/sibds/GenCreativeImage) · демо: [gencreativeimage.vercel.app](https://gencreativeimage.vercel.app)
 
 © ООО «СибСР»
+
+## Скриншоты
+
+<p align="center">
+  <img src="docs/screenshots/launcher.png" alt="Лаунчер: выбор герба или орнамента" width="900" />
+</p>
+
+| Герб семьи | Орнамент Прикамья |
+|---|---|
+| <img src="docs/screenshots/crest.png" alt="Генератор семейного герба" /> | <img src="docs/screenshots/ornament.png" alt="Генератор орнамента Прикамья" /> |
 
 ## Что умеет
 
@@ -84,6 +108,13 @@ npm run build
 npm run preview   # прод-сборка + тот же API-плагин
 npm test          # vitest run
 npm run lint      # oxlint
+```
+
+Переснять скрины README (нужны Chrome и `playwright-core`, дев-сервер на `:5173`):
+
+```bash
+npm i -D playwright-core
+node scripts/capture-screenshots.mjs
 ```
 
 ## Промпты
