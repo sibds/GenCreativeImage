@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createBlobStore, createJobStore, createMemoryStore, resetMemoryStore } from './jobStore.js';
+import {
+  createBlobStore,
+  createJobStore,
+  createMemoryStore,
+  hasBlobConfig,
+  resetMemoryStore
+} from './jobStore.js';
 
 describe('jobStore', () => {
   beforeEach(() => {
@@ -28,6 +34,17 @@ describe('jobStore', () => {
     const store = createJobStore({});
     await store.set('shared', { status: 'pending' });
     expect(await createMemoryStore().get('shared')).toEqual({ status: 'pending' });
+  });
+
+  it('uses memory on Vercel when blob credentials are missing', async () => {
+    expect(hasBlobConfig({ VERCEL: '1' })).toBe(false);
+    const store = createJobStore({ VERCEL: '1' });
+    await store.set('vercel-fallback', { status: 'pending' });
+    expect(await store.get('vercel-fallback')).toEqual({ status: 'pending' });
+  });
+
+  it('uses blob on Vercel when BLOB_READ_WRITE_TOKEN is set', () => {
+    expect(hasBlobConfig({ VERCEL: '1', BLOB_READ_WRITE_TOKEN: 'blob_rw_test' })).toBe(true);
   });
 
   it('writes and reads JSON through the blob adapter with BLOB_STORE_ID', async () => {

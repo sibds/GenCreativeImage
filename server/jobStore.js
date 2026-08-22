@@ -70,7 +70,13 @@ export function createBlobStore({ putFn, getFn, env = process.env } = {}) {
   };
 }
 
+export function hasBlobConfig(env = process.env) {
+  if (env.BLOB_READ_WRITE_TOKEN) return true;
+  if (env.VERCEL_OIDC_TOKEN && env.BLOB_STORE_ID) return true;
+  return false;
+}
+
 export function createJobStore(env = process.env) {
-  if (env.VERCEL) return createBlobStore({ env });
+  if (env.VERCEL && hasBlobConfig(env)) return createBlobStore({ env });
   return createMemoryStore();
 }
